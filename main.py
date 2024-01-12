@@ -10,7 +10,9 @@ keys = {
     'FAQ',
     'Контакты'
 }
-
+keys2 = {
+            "МФО", "КПК", "СКЛК", "Ломбард", "СРО","Назад"
+        }
 bot = telebot.TeleBot(TOKEN)
 
 
@@ -43,23 +45,59 @@ def help(message: telebot.types.Message):
 def handle_category(message: telebot.types.Message):
     category = message.text
     if category == 'База данных':
-        bot.reply_to(message, "Вы выбрали: Вопросы по документам. Задайте свой вопрос")
+        keys2 = {
+            "МФО", "КПК", "СКЛК", "Ломбард", "СРО","Назад"
+        }
+        keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+        buttons = [types.KeyboardButton(text=key) for key in keys2]
+        keyboard.add(*buttons)
+
+        bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
     elif category == 'Информация':
-        bot.reply_to(message, "Вы выбрали: Вопросы по навигации. Задайте свой вопрос")
+        bot.reply_to(message, "Основная информация о наших услугах и условиях предоставления микрозаймов.")
     elif category == 'FAQ':
-        bot.reply_to(message, "Вы выбрали: Вопросы по личной эффективности. Задайте свой вопрос")
-    elif category == 'FAQ':
-        bot.reply_to(message, "Вы выбрали: Вопросы по личной эффективности. Задайте свой вопрос")
+        keys2 = {
+            "МФО", "КПК", "СКЛК", "Ломбард", "СРО","Назад"
+        }
+        keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+        buttons = [types.KeyboardButton(text=key) for key in keys2]
+        keyboard.add(*buttons)
+
+        bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
+    elif category == 'Контакты':
+        bot.reply_to(message, "Наши контактные данные: телефон - 123-456, email - example@example.com")
     else:
-        bot.reply_to(message, "Извините, я не могу ответить на этот вопрос.")
+        bot.reply_to(message, "Извините, бот не может обработать этот запрос")
+
+    @bot.message_handler(func=lambda message: message.text in keys2)
+    def handle_subcategory(message: telebot.types.Message):
+        subcategory = message.text
+        if subcategory == 'МФО':
+            bot.reply_to(message, "МФО - микрофинансовая организация")
+        elif subcategory == 'КПК':
+            bot.reply_to(message, "КПК - финансовая потребительская кооперация")
+        elif subcategory == 'СКЛК':
+            bot.reply_to(message, "СКЛК - специализированная потребительская кооперативная касса")
+        elif subcategory == 'Ломбард':
+            bot.reply_to(message, "Ломбард - учреждение, осуществляющее кредитование под залог движимого имущества")
+        elif subcategory == 'СРО':
+            bot.reply_to(message, "СРО - саморегулируемая организация")
+        elif subcategory == 'Назад':
+            keys = {
+                'Информация',
+                'База данных',
+                'FAQ',
+                'Контакты'
+            }
+            keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+            buttons = [types.KeyboardButton(text=key) for key in keys]
+            keyboard.add(*buttons)
+
+            bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
+        else:
+            bot.reply_to(message, "Извините, бот не может обработать этот запрос")
 
 
-@bot.message_handler(content_types=['text', ])
-def convert(message: telebot.types.Message):
-    user_text = message.text
-    if user_text == 'Где оформить заявление на отпуск?':
-        bot.reply_to(message, "Перейдите в раздел")
-    # Отправляем запрос к OpenAI API, используя ваш API ключ
 
 
 bot.polling()
