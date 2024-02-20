@@ -1,6 +1,7 @@
 import telebot
 from telebot import types
 
+
 TOKEN = "6987493385:AAFb4pcu4-PBtuYHyECEN22k_1qWQcMW6Gs"
 keys = {
     'Информация',
