@@ -1,37 +1,29 @@
 import telebot
 from telebot import types
 
-
 TOKEN = "6987493385:AAFb4pcu4-PBtuYHyECEN22k_1qWQcMW6Gs"
 keys = {
     'Информация',
-    'База данных',
+    'Сбережения',
+    'Заем',
+    'Проверка надежности организации',
+    'Проверка своей кредитной истории',
     'FAQ',
     'Контакты'
 }
 keys2 = {
-    "МФО", "КПК", "СКЛК", "Ломбард", "СРО", "Назад"
+    "МФК", "КПК", "СКПК", "Назад"
 }
-options = {"ИНН", "ОГРН", "Название", "Местоположение", "Назад", "Меню"}
+yes_no={"Да","Нет"}
+yes_no2={"Да, хочу","Нет, не хочу"}
+oline_ofline={'Хочу онлайн','Хочу офлайн'}
+options = {"ИНН", "ОГРН", "Название", "Назад", "Меню"}
 bot = telebot.TeleBot(TOKEN)
 
 
 @bot.message_handler(commands=['start', 'help'])
 def help(message: telebot.types.Message):
-    text = '''Привет и добро пожаловать в нашего Telegram-бота по микрозаймам! 
-
-Я готов помочь тебе получить информацию, ознакомиться с нашей базой данных, ответить на часто задаваемые вопросы и предоставить контактные данные для связи с нами. 
-
-Выбери одну из четырех кнопок ниже, чтобы начать: 
-
-- "Информация" - узнай больше о наших услугах и условиях предоставления микрозаймов. 
-- "База данных" - получи доступ к нашей базе данных с информацией о наших клиентах и текущих займах. 
-- "FAQ" - получи ответы на часто задаваемые вопросы о микрозаймах и нашем боте. 
-- "Контакты" - свяжись с нами для получения дополнительной помощи и консультаций. 
-
-Если у тебя возникнут вопросы или тебе потребуется специальная помощь, не стесняйся обратиться к нам! Мы готовы помочь тебе получить нужный микрозайм и решить твои финансовые вопросы. 
-
-Удачи и надеюсь, что наш Telegram-бот будет полезным для тебя!'''
+    text = '''Я чат-бот, который поможет Вам узнать актуальную информацию о микрофинансовых организациях. Здесь Вы сможете найти ответы на все вопросы об условиях займов и сбережений, процентных ставках, сроках и прочих услугах. Начнём?'''
     bot.reply_to(message, text)
 
     keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
@@ -49,30 +41,78 @@ def handle_category(message: telebot.types.Message):
         'Контакты': "Наши контактные данные: телефон - 123-456, email - example@example.com"
     }
 
-    if category == 'База данных':
+    if category == 'Сбережения':
         keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
-        buttons = [types.KeyboardButton(text=key) for key in keys2]
+        buttons = [types.KeyboardButton(text=key) for key in yes_no]
         keyboard.add(*buttons)
 
-        bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
+        bot.send_message(message.chat.id, "Принято ли решение о типе организации:", reply_markup=keyboard)
 
+        @bot.message_handler(func=lambda message: message.text in yes_no)
+        def handle_subcategory(message: telebot.types.Message):
+            subcategory = message.text
+            if subcategory == 'Да':
+                keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+                buttons = [types.KeyboardButton(text=key) for key in keys2]
+                keyboard.add(*buttons)
+                bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
+            if subcategory == 'Нет':
+                keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+                buttons = [types.KeyboardButton(text=key) for key in yes_no2]
+                keyboard.add(*buttons)
+                bot.send_message(message.chat.id, "Хотите узнать больше про все типы организаций?", reply_markup=keyboard)
+
+                @bot.message_handler(func=lambda message: message.text in yes_no2)
+                def handle_subcategory(message: telebot.types.Message):
+                    subcategory = message.text
+                    if subcategory == 'Да, хочу':
+                        options2 = {"Информация о МФО", "Информация о КПК", "Информация о СКПК",
+                                    "Информация о Ломбардах",
+                                    "Информация о СРО", "Назад", "Меню"}
+                        keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+                        buttons = [types.KeyboardButton(text=key) for key in options2]
+                        keyboard.add(*buttons)
+                        bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
+                    if subcategory == 'Нет, не хочу':
+                        keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+                        buttons = [types.KeyboardButton(text=key) for key in oline_ofline]
+                        keyboard.add(*buttons)
+                        bot.send_message(message.chat.id, "Хотите онлайн?",
+                                        reply_markup=keyboard)
+
+                        @bot.message_handler(func=lambda message: message.text in oline_ofline)
+                        def handle_subcategory(message: telebot.types.Message):
+                            subcategory = message.text
+                            if subcategory == 'Хочу онлайн':
+                                often = {'Редо','Часто'}
+                                keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+                                buttons = [types.KeyboardButton(text=key) for key in often]
+                                keyboard.add(*buttons)
+                                bot.send_message(message.chat.id, "Как часто Вы пользуетесь сбережениями?", reply_markup=keyboard)
+                            if subcategory == 'Хочу офлайн':
+                                response = {'Хорошо', 'Нет, спасибо'}
+                                keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+                                buttons = [types.KeyboardButton(text=key) for key in response]
+                                keyboard.add(*buttons)
+                                bot.send_message(message.chat.id, "Тогда рекомендуем Вам обратиться в МФО. Обратите внимание  минимальный размер инвестиций в МФК для граждан и индивидуальных предпринимателей — 1,5 млн рублей.",
+                                                 reply_markup=keyboard)
         @bot.message_handler(func=lambda message: message.text in keys2)
         def handle_subcategory1(message: telebot.types.Message):
             subcategory = message.text
 
-            options = {"ИНН", "ОГРН", "Название", "Местоположение", "Назад", "Меню"}
+            options = {"ИНН", "ОГРН", "Название", "Назад", "Меню"}
             if subcategory == 'Назад':
                 keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
                 buttons = [types.KeyboardButton(text=key) for key in keys]
                 keyboard.add(*buttons)
 
                 bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
-            elif subcategory in ["МФО", "КПК", "СКЛК", "Ломбард"]:
+            elif subcategory in ["МФК", "КПК", "СКПК", "Ломбард"]:
                 keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
                 buttons = [types.KeyboardButton(text=key) for key in options]
                 keyboard.add(*buttons)
 
-                bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
+                bot.send_message(message.chat.id, "По какому признаку вы хотите выбрать организацию:", reply_markup=keyboard)
 
                 @bot.message_handler(func=lambda message: message.text in options)
                 def handle_subcategory2(message: telebot.types.Message):
@@ -83,15 +123,13 @@ def handle_category(message: telebot.types.Message):
                         bot.send_message(message.chat.id, "Введите ОГРН:")
                     elif subcategory == "Название":
                         bot.send_message(message.chat.id, "Введите Название:")
-                    elif subcategory == "Местоположение":
-                        bot.send_message(message.chat.id, "Введите Местоположение:")
             else:
                 bot.reply_to(message, messages.get(subcategory, "Извините, бот не может обработать этот запрос"))
 
 
-    elif category == 'FAQ':
-        options2 = {"Информация о МФО", "Информация о КПК", "Информация о СКЛК", "Информация о Ломбардах",
-                    "Информация о СРО", "Вернуться"}
+    if category == 'FAQ':
+        options2 = {"Информация о МФО", "Информация о КПК", "Информация о СКПК", "Информация о Ломбардах",
+                    "Информация о СРО", "Назад", "Меню"}
         keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
         buttons = [types.KeyboardButton(text=key) for key in options2]
         keyboard.add(*buttons)
@@ -108,7 +146,7 @@ def handle_category(message: telebot.types.Message):
                 "Какая информация обязательна при заполнении заявки?",
                 "Как долго занимает процесс рассмотрения заявки?",
                 "Как осуществляется погашение займа?",
-                "Что происходит, если я не могу погасить займ вовремя?", "Назад"
+                "Что происходит, если я не могу погасить займ вовремя?", "Назад", "Меню"
             }
             questions_kpk = {"Что такое кредитный потребительский кооператив?",
                              "Как стать членом КПК?",
@@ -280,12 +318,22 @@ def handle_category(message: telebot.types.Message):
                         bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
                     else:
                         bot.reply_to(message, messages.get(subcategory, default_message))
-            elif subcategory == "Вернуться":
+            elif subcategory == "Меню":
                 keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
                 buttons = [types.KeyboardButton(text=key) for key in keys]
                 keyboard.add(*buttons)
 
                 bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
+    if category == 'Проверка своей кредитной истории':
+        text='Вы можете воспользоваться услугами БКИ(ссылка)'
+        bot.reply_to(message, text)
+        text2='Также на сайте (ссылка) вы можете посмотреть подробную пошаговую инструкцию по проверке своей кредитной истории'
+        bot.reply_to(message, text2)
+    if category == 'Проверка надежности организации':
+        keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+        buttons = [types.KeyboardButton(text=key) for key in options]
+        keyboard.add(*buttons)
+        bot.send_message(message.chat.id, "Выберете категорию:", reply_markup=keyboard)
 
 
 bot.polling()
